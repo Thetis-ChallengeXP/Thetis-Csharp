@@ -50,7 +50,7 @@ Thetis/
 * **ThetisModel**: tipos compartilhados (Entities/DTOs/ViewModels/Enums). Sem dependência de infraestrutura.
 
 ### Diagrama de Componentes
-![Diagrama de componentes](./images/Diagrama_componentes(1).png)
+![Diagrama de componentes](./images/diagrama_componentes(1).png)
 
 ### Diagrama de domínio
 ![Diagrama de domínio](./images/Diagrama.png)
