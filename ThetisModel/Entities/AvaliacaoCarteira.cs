@@ -29,7 +29,7 @@ namespace ThetisModel.Entities
         [StringLength(1000)]
         public string Comentarios { get; set; }
 
-        [Column("IMPLEMENTOU_RECOMENDACAO", TypeName = "NUMBER(1)")]
+        [Column("IMPLEMENTOU_RECOMENDACAO")]
         public bool ImplementouRecomendacao { get; set; }
 
         [Column("PERCENTUAL_IMPLEMENTADO", TypeName = "NUMBER(5,2)")]
@@ -42,7 +42,7 @@ namespace ThetisModel.Entities
         [Column("DATA_AVALIACAO")]
         public DateTime DataAvaliacao { get; set; } = DateTime.Now;
 
-        [Column("RECOMENDARIA", TypeName = "NUMBER(1)")]
+        [Column("RECOMENDARIA")]
         public bool Recomendaria { get; set; }
 
         // Relacionamentos

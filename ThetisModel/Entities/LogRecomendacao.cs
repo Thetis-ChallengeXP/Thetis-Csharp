@@ -32,20 +32,12 @@ namespace ThetisModel.Entities
         [Column("DATA_PROCESSAMENTO")]
         public DateTime DataProcessamento { get; set; } = DateTime.Now;
 
-        [Column("IP_ORIGEM")]
-        [StringLength(45)]
-        public string IpOrigem { get; set; }
-
-        [Column("USER_AGENT")]
-        [StringLength(500)]
-        public string UserAgent { get; set; }
-
-        [Column("SUCESSO", TypeName = "NUMBER(1)")]
+        [Column("SUCESSO")]
         public bool Sucesso { get; set; }
 
         [Column("ERRO_MENSAGEM")]
         [StringLength(1000)]
-        public string ErroMensagem { get; set; }
+        public string? ErroMensagem { get; set; }
 
         // Relacionamentos
         [ForeignKey("ClienteId")]

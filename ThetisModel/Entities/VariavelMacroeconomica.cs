@@ -50,7 +50,7 @@ namespace ThetisModel.Entities
         [StringLength(500)]
         public string ImpactoInvestimentos { get; set; }
 
-        [Column("ATIVA", TypeName = "NUMBER(1)")]
+        [Column("ATIVA")]
         public bool Ativa { get; set; } = true;
 
         // Relacionamentos

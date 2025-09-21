@@ -12,8 +12,8 @@ using ThetisData.Context;
 namespace ThetisData.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250914231428_Initial")]
-    partial class Initial
+    [Migration("20250921204900_DropIpUserAgentFromLogs")]
+    partial class DropIpUserAgentFromLogs
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,7 +25,7 @@ namespace ThetisData.Migrations
 
             OracleModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("TB_ATIVO_VARIAVEL_MACRO", b =>
+            modelBuilder.Entity("THETIS_ATIVO_VARIAVEL_MACRO", b =>
                 {
                     b.Property<int>("ID_ATIVO")
                         .HasColumnType("NUMBER(10)");
@@ -37,7 +37,7 @@ namespace ThetisData.Migrations
 
                     b.HasIndex("ID_VARIAVEL");
 
-                    b.ToTable("TB_ATIVO_VARIAVEL_MACRO", (string)null);
+                    b.ToTable("THETIS_ATIVO_VARIAVEL_MACRO", (string)null);
                 });
 
             modelBuilder.Entity("ThetisModel.Entities.Ativo", b =>
@@ -48,6 +48,12 @@ namespace ThetisData.Migrations
                         .HasColumnName("ID_ATIVO");
 
                     OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AtivoSistema")
+                        .IsRequired()
+                        .HasMaxLength(1)
+                        .HasColumnType("CHAR(1)")
+                        .HasColumnName("ATIVO_SISTEMA");
 
                     b.Property<string>("Codigo")
                         .IsRequired()
@@ -97,10 +103,6 @@ namespace ThetisData.Migrations
                         .HasColumnType("NUMBER(15,2)")
                         .HasColumnName("VALOR_MINIMO");
 
-                    b.Property<bool>("isAtivo")
-                        .HasColumnType("NUMBER(1)")
-                        .HasColumnName("ATIVO_SISTEMA");
-
                     b.HasKey("Id");
 
                     b.HasIndex("Codigo")
@@ -137,8 +139,10 @@ namespace ThetisData.Migrations
                         .HasColumnType("TIMESTAMP(7)")
                         .HasColumnName("DATA_AVALIACAO");
 
-                    b.Property<bool>("ImplementouRecomendacao")
-                        .HasColumnType("NUMBER(1)")
+                    b.Property<string>("ImplementouRecomendacao")
+                        .IsRequired()
+                        .HasMaxLength(1)
+                        .HasColumnType("CHAR(1)")
                         .HasColumnName("IMPLEMENTOU_RECOMENDACAO");
 
                     b.Property<string>("MotivoNaoImplementacao")
@@ -163,8 +167,10 @@ namespace ThetisData.Migrations
                         .HasColumnType("NUMBER(5,2)")
                         .HasColumnName("PERCENTUAL_IMPLEMENTADO");
 
-                    b.Property<bool>("Recomendaria")
-                        .HasColumnType("NUMBER(1)")
+                    b.Property<string>("Recomendaria")
+                        .IsRequired()
+                        .HasMaxLength(1)
+                        .HasColumnType("CHAR(1)")
                         .HasColumnName("RECOMENDARIA");
 
                     b.HasKey("Id");
@@ -185,12 +191,15 @@ namespace ThetisData.Migrations
 
                     OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<bool?>("AprovadaCliente")
-                        .HasColumnType("NUMBER(1)")
+                    b.Property<string>("AprovadaCliente")
+                        .HasMaxLength(1)
+                        .HasColumnType("CHAR(1)")
                         .HasColumnName("APROVADA_CLIENTE");
 
-                    b.Property<bool>("Ativa")
-                        .HasColumnType("NUMBER(1)")
+                    b.Property<string>("Ativa")
+                        .IsRequired()
+                        .HasMaxLength(1)
+                        .HasColumnType("CHAR(1)")
                         .HasColumnName("ATIVA");
 
                     b.Property<int>("ClienteId")
@@ -263,8 +272,10 @@ namespace ThetisData.Migrations
 
                     OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("Ativo")
-                        .HasColumnType("NUMBER(1)")
+                    b.Property<string>("Ativo")
+                        .IsRequired()
+                        .HasMaxLength(1)
+                        .HasColumnType("CHAR(1)")
                         .HasColumnName("ATIVO");
 
                     b.Property<string>("Cpf")
@@ -508,8 +519,10 @@ namespace ThetisData.Migrations
                         .HasColumnType("CLOB")
                         .HasColumnName("RESULTADO_ALGORITMO");
 
-                    b.Property<bool>("Sucesso")
-                        .HasColumnType("NUMBER(1)")
+                    b.Property<string>("Sucesso")
+                        .IsRequired()
+                        .HasMaxLength(1)
+                        .HasColumnType("CHAR(1)")
                         .HasColumnName("SUCESSO");
 
                     b.Property<int>("TempoProcessamentoMs")
@@ -549,8 +562,10 @@ namespace ThetisData.Migrations
 
                     OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("Ativa")
-                        .HasColumnType("NUMBER(1)")
+                    b.Property<string>("Ativa")
+                        .IsRequired()
+                        .HasMaxLength(1)
+                        .HasColumnType("CHAR(1)")
                         .HasColumnName("ATIVA");
 
                     b.Property<string>("Codigo")
@@ -623,7 +638,7 @@ namespace ThetisData.Migrations
                     b.ToTable("THETIS_VARIAVEIS_MACROECONOMICAS");
                 });
 
-            modelBuilder.Entity("TB_ATIVO_VARIAVEL_MACRO", b =>
+            modelBuilder.Entity("THETIS_ATIVO_VARIAVEL_MACRO", b =>
                 {
                     b.HasOne("ThetisModel.Entities.Ativo", null)
                         .WithMany()

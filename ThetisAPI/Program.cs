@@ -14,37 +14,28 @@ namespace InvestmentAdvisorAPI
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // ===== SERVIÇOS BÁSICOS =====
+            // Config
+            var conn = builder.Configuration.GetConnectionString("Oracle");
 
-            // Controllers
+            // Serviços
             builder.Services.AddControllers();
+            builder.Services.AddDbContextPool<AppDbContext>(opt => opt.UseOracle(conn));
+            builder.Services.AddAutoMapper(cfg => { }, typeof(ThetisMappingProfile).Assembly);
 
-            // Entity Framework Oracle
-            builder.Services.AddDbContext<AppDbContext>(options =>
-                options.UseOracle("User Id=RM98680;Password=271204;Data Source=oracle.fiap.com.br:1521/ORCL;"));
-
-            // AutoMapper - Configuração simples
-            builder.Services.AddAutoMapper(cfg =>
-            {
-                cfg.AddProfile<ThetisMappingProfile>();
-            });
-
-            // Repositories
             builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
-
-            // Services
             builder.Services.AddScoped<IClienteService, ClienteService>();
             builder.Services.AddScoped<IAtivoService, AtivoService>();
             builder.Services.AddScoped<IRecomendacaoService, RecomendacaoService>();
             builder.Services.AddScoped<IVariavelMacroeconomicaService, VariavelMacroeconomicaService>();
+            builder.Services.AddSingleton<IFileStorage, FileStorage>();
 
-            // Swagger
             builder.Services.AddEndpointsApiExplorer();
+
             builder.Services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new()
                 {
-                    Title = "Assessor Virtual API",
+                    Title = "Thetis API",
                     Version = "v1",
                     Description = "API para recomendação de investimentos"
                 });
@@ -52,30 +43,20 @@ namespace InvestmentAdvisorAPI
 
             var app = builder.Build();
 
-            // ===== PIPELINE =====
-
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI(c =>
-                {
-                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Assessor Virtual API");
-                    c.RoutePrefix = string.Empty; // Swagger na raiz
-                });
-            }
-
+            // HTTPS
             app.UseHttpsRedirection();
-            app.MapControllers();
 
-            // Endpoint de teste
-            app.MapGet("/api", () => new
+            // Swagger na raiz sempre
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
             {
-                Message = "Assessor Virtual de Investimentos API",
-                Version = "1.0.0",
-                Status = "Running"
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Assessor Virtual API v1");
+                c.RoutePrefix = string.Empty;
             });
 
+            app.MapControllers();
             app.Run();
         }
     }
 }
+

@@ -1,9 +1,10 @@
 ﻿using AutoMapper;
-using ThetisData.Context;
-using ThetisService.Interfaces;
-using ThetisModel.DTOs;
-using ThetisModel.ViewModels;
 using Microsoft.EntityFrameworkCore;
+using ThetisData.Context;
+using ThetisModel.DTOs;
+using ThetisModel.Entities;
+using ThetisModel.ViewModels;
+using ThetisService.Interfaces;
 
 namespace ThetisService.Implementations
 {
@@ -30,8 +31,19 @@ namespace ThetisService.Implementations
 
         public async Task<VariavelMacroeconomicaViewModel> GetByCodigoAsync(string codigo)
         {
+            var code = codigo.Trim().ToUpperInvariant();
+
             var variavel = await _context.VariaveisMacroeconomicas
-                .FirstOrDefaultAsync(v => v.Codigo == codigo && v.Ativa);
+                .AsNoTracking()
+                .FirstOrDefaultAsync(v => v.Ativa && v.Codigo.ToUpper() == code);
+
+            if (variavel == null && code.Length >= 2)
+            {
+                variavel = await _context.VariaveisMacroeconomicas
+                    .AsNoTracking()
+                    .Where(v => v.Ativa && v.Codigo.ToUpper().Contains(code))
+                    .FirstOrDefaultAsync();
+            }
 
             if (variavel == null)
                 throw new KeyNotFoundException($"Variável {codigo} não encontrada");

@@ -47,7 +47,7 @@ namespace ThetisModel.Entities
         [Column("DATA_CADASTRO")]
         public DateTime DataCadastro { get; set; } = DateTime.Now;
 
-        [Column("ATIVO", TypeName = "NUMBER(1)")]
+        [Column("ATIVO")]
         public bool Ativo { get; set; } = true;
 
         // Relacionamentos

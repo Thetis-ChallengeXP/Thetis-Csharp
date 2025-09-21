@@ -43,8 +43,8 @@ namespace ThetisModel.Entities
         [Column("TAXA_ADMINISTRACAO", TypeName = "NUMBER(5,2)")]
         public decimal TaxaAdministracao { get; set; }
 
-        [Column("ATIVO_SISTEMA", TypeName = "NUMBER(1)")]
-        public bool isAtivo { get; set; } = true;
+        [Column("ATIVO_SISTEMA")]
+        public bool AtivoSistema { get; set; } = true;
 
         [Column("DATA_CRIACAO")]
         public DateTime DataCriacao { get; set; } = DateTime.Now;

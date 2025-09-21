@@ -48,10 +48,10 @@ namespace ThetisModel.Entities
         [Column("DATA_GERACAO")]
         public DateTime DataGeracao { get; set; } = DateTime.Now;
 
-        [Column("ATIVA", TypeName = "NUMBER(1)")]
+        [Column("ATIVA")]
         public bool Ativa { get; set; } = true;
 
-        [Column("APROVADA_CLIENTE", TypeName = "NUMBER(1)")]
+        [Column("APROVADA_CLIENTE")]
         public bool? AprovadaCliente { get; set; }
 
         [Column("DATA_APROVACAO")]

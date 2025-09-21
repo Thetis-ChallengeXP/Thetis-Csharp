@@ -26,7 +26,7 @@ namespace ThetisData.Migrations
                     LIQUIDEZ_DIAS = table.Column<int>(type: "NUMBER(10)", nullable: false),
                     VALOR_MINIMO = table.Column<decimal>(type: "NUMBER(15,2)", nullable: false),
                     TAXA_ADMINISTRACAO = table.Column<decimal>(type: "NUMBER(5,2)", nullable: false),
-                    ATIVO_SISTEMA = table.Column<bool>(type: "NUMBER(1)", nullable: false),
+                    ATIVO_SISTEMA = table.Column<string>(type: "CHAR(1)", maxLength: 1, nullable: false),
                     DATA_CRIACAO = table.Column<DateTime>(type: "TIMESTAMP(7)", nullable: false)
                 },
                 constraints: table =>
@@ -50,7 +50,7 @@ namespace ThetisData.Migrations
                     OBJETIVO_PRINCIPAL = table.Column<int>(type: "NUMBER(10)", nullable: false, comment: "1=CurtoPrazo, 2=MedioPrazo, 3=LongoPrazo, 4=Aposentadoria, 5=ReservaEmergencia"),
                     PRAZO_INVESTIMENTO = table.Column<int>(type: "NUMBER(10)", nullable: false),
                     DATA_CADASTRO = table.Column<DateTime>(type: "TIMESTAMP(7)", nullable: false),
-                    ATIVO = table.Column<bool>(type: "NUMBER(1)", nullable: false)
+                    ATIVO = table.Column<string>(type: "CHAR(1)", maxLength: 1, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -74,7 +74,7 @@ namespace ThetisData.Migrations
                     FONTE_DADOS = table.Column<string>(type: "NVARCHAR2(100)", maxLength: 100, nullable: false),
                     TENDENCIA = table.Column<string>(type: "NVARCHAR2(20)", maxLength: 20, nullable: false),
                     IMPACTO_INVESTIMENTOS = table.Column<string>(type: "NVARCHAR2(500)", maxLength: 500, nullable: false),
-                    ATIVA = table.Column<bool>(type: "NUMBER(1)", nullable: false)
+                    ATIVA = table.Column<string>(type: "CHAR(1)", maxLength: 1, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -97,8 +97,8 @@ namespace ThetisData.Migrations
                     EXPLICACAO = table.Column<string>(type: "NVARCHAR2(2000)", maxLength: 2000, nullable: false),
                     SCORE_ADEQUACAO = table.Column<decimal>(type: "NUMBER(3,2)", nullable: false),
                     DATA_GERACAO = table.Column<DateTime>(type: "TIMESTAMP(7)", nullable: false),
-                    ATIVA = table.Column<bool>(type: "NUMBER(1)", nullable: false),
-                    APROVADA_CLIENTE = table.Column<bool>(type: "NUMBER(1)", nullable: true),
+                    ATIVA = table.Column<string>(type: "CHAR(1)", maxLength: 1, nullable: false),
+                    APROVADA_CLIENTE = table.Column<string>(type: "CHAR(1)", maxLength: 1, nullable: true),
                     DATA_APROVACAO = table.Column<DateTime>(type: "TIMESTAMP(7)", nullable: true)
                 },
                 constraints: table =>
@@ -113,7 +113,7 @@ namespace ThetisData.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "TB_ATIVO_VARIAVEL_MACRO",
+                name: "THETIS_ATIVO_VARIAVEL_MACRO",
                 columns: table => new
                 {
                     ID_ATIVO = table.Column<int>(type: "NUMBER(10)", nullable: false),
@@ -121,7 +121,7 @@ namespace ThetisData.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_TB_ATIVO_VARIAVEL_MACRO", x => new { x.ID_ATIVO, x.ID_VARIAVEL });
+                    table.PrimaryKey("PK_THETIS_ATIVO_VARIAVEL_MACRO", x => new { x.ID_ATIVO, x.ID_VARIAVEL });
                     table.ForeignKey(
                         name: "FK_ATIVO_VAR_ATIVO",
                         column: x => x.ID_ATIVO,
@@ -148,11 +148,11 @@ namespace ThetisData.Migrations
                     NOTA_ADEQUACAO = table.Column<int>(type: "NUMBER(10)", nullable: false),
                     NOTA_EXPLICACAO = table.Column<int>(type: "NUMBER(10)", nullable: false),
                     COMENTARIOS = table.Column<string>(type: "NVARCHAR2(1000)", maxLength: 1000, nullable: false),
-                    IMPLEMENTOU_RECOMENDACAO = table.Column<bool>(type: "NUMBER(1)", nullable: false),
+                    IMPLEMENTOU_RECOMENDACAO = table.Column<string>(type: "CHAR(1)", maxLength: 1, nullable: false),
                     PERCENTUAL_IMPLEMENTADO = table.Column<decimal>(type: "NUMBER(5,2)", nullable: true),
                     MOTIVO_NAO_IMPLEMENTACAO = table.Column<string>(type: "NVARCHAR2(500)", maxLength: 500, nullable: false),
                     DATA_AVALIACAO = table.Column<DateTime>(type: "TIMESTAMP(7)", nullable: false),
-                    RECOMENDARIA = table.Column<bool>(type: "NUMBER(1)", nullable: false)
+                    RECOMENDARIA = table.Column<string>(type: "CHAR(1)", maxLength: 1, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -262,7 +262,7 @@ namespace ThetisData.Migrations
                     DATA_PROCESSAMENTO = table.Column<DateTime>(type: "TIMESTAMP(7)", nullable: false),
                     IP_ORIGEM = table.Column<string>(type: "NVARCHAR2(45)", maxLength: 45, nullable: false),
                     USER_AGENT = table.Column<string>(type: "NVARCHAR2(500)", maxLength: 500, nullable: false),
-                    SUCESSO = table.Column<bool>(type: "NUMBER(1)", nullable: false),
+                    SUCESSO = table.Column<string>(type: "CHAR(1)", maxLength: 1, nullable: false),
                     ERRO_MENSAGEM = table.Column<string>(type: "NVARCHAR2(1000)", maxLength: 1000, nullable: false)
                 },
                 constraints: table =>
@@ -283,8 +283,8 @@ namespace ThetisData.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_TB_ATIVO_VARIAVEL_MACRO_ID_VARIAVEL",
-                table: "TB_ATIVO_VARIAVEL_MACRO",
+                name: "IX_THETIS_ATIVO_VARIAVEL_MACRO_ID_VARIAVEL",
+                table: "THETIS_ATIVO_VARIAVEL_MACRO",
                 column: "ID_VARIAVEL");
 
             migrationBuilder.CreateIndex(
@@ -386,7 +386,7 @@ namespace ThetisData.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "TB_ATIVO_VARIAVEL_MACRO");
+                name: "THETIS_ATIVO_VARIAVEL_MACRO");
 
             migrationBuilder.DropTable(
                 name: "THETIS_AVALIACOES_CARTEIRA");

@@ -6,7 +6,7 @@ using ThetisService.Interfaces;
 namespace ThetisApi.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("[controller]/[action]")]
     [Produces("application/json")]
     public class RecomendacoesController : ControllerBase
     {
@@ -17,9 +17,7 @@ namespace ThetisApi.Controllers
             _recomendacaoService = recomendacaoService;
         }
 
-        [HttpPost("gerar")]
-        [ProducesResponseType(typeof(CarteiraRecomendadaViewModel), 200)]
-        [ProducesResponseType(400)]
+        [HttpPost]
         public async Task<ActionResult<CarteiraRecomendadaViewModel>> GerarRecomendacao(
             [FromBody] SolicitacaoRecomendacaoDto solicitacao)
         {
@@ -34,8 +32,7 @@ namespace ThetisApi.Controllers
             }
         }
 
-        [HttpGet("cliente/{clienteId}")]
-        [ProducesResponseType(typeof(IEnumerable<CarteiraRecomendadaViewModel>), 200)]
+        [HttpGet("{clienteId}")]
         public async Task<ActionResult<IEnumerable<CarteiraRecomendadaViewModel>>> GetByCliente(int clienteId)
         {
             var carteiras = await _recomendacaoService.GetRecomendacoesByClienteAsync(clienteId);
@@ -43,8 +40,6 @@ namespace ThetisApi.Controllers
         }
 
         [HttpGet("{id}")]
-        [ProducesResponseType(typeof(CarteiraRecomendadaViewModel), 200)]
-        [ProducesResponseType(404)]
         public async Task<ActionResult<CarteiraRecomendadaViewModel>> GetById(int id)
         {
             try
@@ -58,9 +53,7 @@ namespace ThetisApi.Controllers
             }
         }
 
-        [HttpPatch("{id}/aprovar")]
-        [ProducesResponseType(typeof(CarteiraRecomendadaViewModel), 200)]
-        [ProducesResponseType(404)]
+        [HttpPatch("{id}")]
         public async Task<ActionResult<CarteiraRecomendadaViewModel>> AprovarCarteira(int id, [FromBody] bool aprovada)
         {
             try
@@ -74,9 +67,7 @@ namespace ThetisApi.Controllers
             }
         }
 
-        [HttpGet("{id}/diversificacao")]
-        [ProducesResponseType(typeof(RelatorioDiversificacaoViewModel), 200)]
-        [ProducesResponseType(404)]
+        [HttpGet("{id}")]
         public async Task<ActionResult<RelatorioDiversificacaoViewModel>> AnalisarDiversificacao(int id)
         {
             try
@@ -90,9 +81,7 @@ namespace ThetisApi.Controllers
             }
         }
 
-        [HttpGet("{id}/simulacao")]
-        [ProducesResponseType(typeof(SimulacaoRendimentoViewModel), 200)]
-        [ProducesResponseType(404)]
+        [HttpGet("{id}")]
         public async Task<ActionResult<SimulacaoRendimentoViewModel>> SimularRendimento(int id, [FromQuery] int meses = 12)
         {
             try

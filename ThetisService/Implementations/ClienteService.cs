@@ -47,14 +47,18 @@ namespace ThetisService.Implementations
 
         public async Task<ClienteViewModel> CreateAsync(ClienteDto clienteDto)
         {
-            // Validações de negócio
-            if (await ExistsByCpfAsync(clienteDto.Cpf))
+            var cpf = (clienteDto.Cpf ?? "").Trim();
+            var email = (clienteDto.Email ?? "").Trim().ToLowerInvariant();
+
+            if (await ExistsByCpfAsync(cpf))
                 throw new InvalidOperationException("CPF já cadastrado no sistema");
 
-            if (await ExistsByEmailAsync(clienteDto.Email))
+            if (await ExistsByEmailAsync(email))
                 throw new InvalidOperationException("Email já cadastrado no sistema");
 
             var cliente = _mapper.Map<Cliente>(clienteDto);
+            cliente.Cpf = cpf;
+            cliente.Email = email;
             cliente.DataCadastro = DateTime.Now;
             cliente.Ativo = true;
 
@@ -69,14 +73,18 @@ namespace ThetisService.Implementations
                 throw new KeyNotFoundException($"Cliente com ID {id} não encontrado");
 
             // Verificar CPF duplicado (exceto o próprio cliente)
+            var cpf = (clienteDto.Cpf ?? "").Trim();
             var existeCpf = await _context.Clientes
-                .AnyAsync(c => c.Cpf == clienteDto.Cpf && c.Id != id && c.Ativo);
+                .Where(c => c.Cpf == clienteDto.Cpf && c.Id != id && c.Ativo)
+                .CountAsync() > 0;
             if (existeCpf)
                 throw new InvalidOperationException("CPF já cadastrado por outro cliente");
 
             // Verificar Email duplicado (exceto o próprio cliente)
+            var email = (clienteDto.Email ?? "").Trim().ToLowerInvariant();
             var existeEmail = await _context.Clientes
-                .AnyAsync(c => c.Email == clienteDto.Email && c.Id != id && c.Ativo);
+                .Where(c => c.Email == clienteDto.Email && c.Id != id && c.Ativo)
+                .CountAsync() > 0;
             if (existeEmail)
                 throw new InvalidOperationException("Email já cadastrado por outro cliente");
 
@@ -99,13 +107,15 @@ namespace ThetisService.Implementations
         public async Task<bool> ExistsByCpfAsync(string cpf)
         {
             return await _context.Clientes
-                .AnyAsync(c => c.Cpf == cpf && c.Ativo);
+                .Where(c => c.Cpf == (cpf ?? "").Trim())
+                .CountAsync() > 0;
         }
 
         public async Task<bool> ExistsByEmailAsync(string email)
         {
             return await _context.Clientes
-                .AnyAsync(c => c.Email == email && c.Ativo);
+                .Where(c => c.Email == (email ?? "").Trim().ToLowerInvariant())
+                .CountAsync() > 0;
         }
 
         public async Task<ClientePerfilViewModel> GetPerfilInvestidorAsync(int clienteId)

@@ -6,7 +6,7 @@ using ThetisService.Interfaces;
 namespace ThetisApi.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("[controller]/[action]")]
     [Produces("application/json")]
     public class ClientesController : ControllerBase
     {
@@ -18,7 +18,6 @@ namespace ThetisApi.Controllers
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(IEnumerable<ClienteViewModel>), 200)]
         public async Task<ActionResult<IEnumerable<ClienteViewModel>>> GetAll()
         {
             var clientes = await _clienteService.GetAllAsync();
@@ -26,8 +25,6 @@ namespace ThetisApi.Controllers
         }
 
         [HttpGet("{id}")]
-        [ProducesResponseType(typeof(ClienteViewModel), 200)]
-        [ProducesResponseType(404)]
         public async Task<ActionResult<ClienteViewModel>> GetById(int id)
         {
             try
@@ -41,9 +38,7 @@ namespace ThetisApi.Controllers
             }
         }
 
-        [HttpGet("{id}/perfil")]
-        [ProducesResponseType(typeof(ClientePerfilViewModel), 200)]
-        [ProducesResponseType(404)]
+        [HttpGet("{id}")]
         public async Task<ActionResult<ClientePerfilViewModel>> GetPerfil(int id)
         {
             try
@@ -58,8 +53,6 @@ namespace ThetisApi.Controllers
         }
 
         [HttpPost]
-        [ProducesResponseType(typeof(ClienteViewModel), 201)]
-        [ProducesResponseType(400)]
         public async Task<ActionResult<ClienteViewModel>> Create([FromBody] ClienteDto clienteDto)
         {
             try
@@ -74,9 +67,6 @@ namespace ThetisApi.Controllers
         }
 
         [HttpPut("{id}")]
-        [ProducesResponseType(typeof(ClienteViewModel), 200)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
         public async Task<ActionResult<ClienteViewModel>> Update(int id, [FromBody] ClienteDto clienteDto)
         {
             try
@@ -95,8 +85,6 @@ namespace ThetisApi.Controllers
         }
 
         [HttpDelete("{id}")]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(404)]
         public async Task<ActionResult> Delete(int id)
         {
             try

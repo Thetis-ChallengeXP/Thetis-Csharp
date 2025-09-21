@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ThetisModel.Entities;
 
 namespace ThetisData.Context
@@ -21,6 +22,32 @@ namespace ThetisData.Context
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            // Converters Y/N
+            var toYN = new BoolToStringConverter("N", "Y");
+            var toYNnullable = new ValueConverter<bool?, string?>(
+                v => v == null ? null : (v.Value ? "Y" : "N"),
+                v => v == null ? (bool?)null : v == "Y"
+            );
+
+            foreach (var et in modelBuilder.Model.GetEntityTypes())
+            {
+                foreach (var p in et.GetProperties())
+                {
+                    if (p.ClrType == typeof(bool))
+                    {
+                        p.SetValueConverter(toYN);
+                        p.SetColumnType("CHAR(1)");
+                        p.SetMaxLength(1);
+                    }
+                    else if (p.ClrType == typeof(bool?))
+                    {
+                        p.SetValueConverter(toYNnullable);
+                        p.SetColumnType("CHAR(1)");
+                        p.SetMaxLength(1);
+                    }
+                }
+            }
 
             // Configurações de índices únicos
             modelBuilder.Entity<Cliente>()
@@ -188,19 +215,6 @@ namespace ThetisData.Context
             modelBuilder.Entity<LogRecomendacao>()
                 .HasIndex(l => l.DataProcessamento)
                 .HasDatabaseName("IX_LOG_DATA");
-        }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            if (!optionsBuilder.IsConfigured)
-            {
-                // Configuração de fallback apenas para desenvolvimento
-                optionsBuilder.UseOracle("User Id=RM98680;Password=271204;Data Source=oracle.fiap.com.br:1521/ORCL;");
-            }
-
-            // Configurações de performance e logging
-            optionsBuilder.EnableSensitiveDataLogging(false);
-            optionsBuilder.EnableDetailedErrors(true);
         }
     }
 }

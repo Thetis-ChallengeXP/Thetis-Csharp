@@ -16,11 +16,13 @@ namespace ThetisService.Mappings
                 .ForMember(dest => dest.DataCadastro, opt => opt.Ignore())
                 .ForMember(dest => dest.Ativo, opt => opt.Ignore())
                 .ForMember(dest => dest.CarteirasRecomendadas, opt => opt.Ignore())
-                .ForMember(dest => dest.HistoricoInvestimentos, opt => opt.Ignore());
+                .ForMember(dest => dest.HistoricoInvestimentos, opt => opt.Ignore())
+                .ForMember(d => d.Nome, o => o.MapFrom(s => (s.Nome ?? string.Empty).Trim()))
+                .ForMember(d => d.Email, o => o.MapFrom(s => (s.Email ?? string.Empty).Trim().ToLowerInvariant()))
+                .ForMember(d => d.Cpf, o => o.MapFrom(s => new string((s.Cpf ?? string.Empty).Where(char.IsDigit).ToArray())));
 
             CreateMap<Cliente, ClienteViewModel>()
-                .ForMember(dest => dest.QuantidadeCarteiras, opt => opt.MapFrom(src =>
-                    src.CarteirasRecomendadas != null ? src.CarteirasRecomendadas.Count : 0))
+                .ForMember(dest => dest.QuantidadeCarteiras, opt => opt.MapFrom(src => src.CarteirasRecomendadas != null ? src.CarteirasRecomendadas.Count : 0))
                 .ForMember(dest => dest.TotalInvestido, opt => opt.MapFrom(src =>
                     src.CarteirasRecomendadas != null
                         ? src.CarteirasRecomendadas.Where(c => c.AprovadaCliente == true).Sum(c => c.ValorTotal)
@@ -30,9 +32,11 @@ namespace ThetisService.Mappings
             CreateMap<AtivoDto, Ativo>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
                 .ForMember(dest => dest.DataCriacao, opt => opt.Ignore())
-                .ForMember(dest => dest.isAtivo, opt => opt.Ignore())
                 .ForMember(dest => dest.ItensCarteira, opt => opt.Ignore())
-                .ForMember(dest => dest.VariaveisMacroeconomicas, opt => opt.Ignore());
+                .ForMember(dest => dest.VariaveisMacroeconomicas, opt => opt.Ignore())
+                .ForMember(d => d.Codigo, o => o.MapFrom(s => (s.Codigo ?? string.Empty).Trim().ToUpperInvariant()))
+                .ForMember(d => d.Nome, o => o.MapFrom(s => (s.Nome ?? string.Empty).Trim()))
+                .ForMember(d => d.Descricao, o => o.MapFrom(s => (s.Descricao ?? string.Empty).Trim()));
 
             CreateMap<Ativo, AtivoViewModel>()
                 .ForMember(dest => dest.VariaveisInfluencia, opt => opt.MapFrom(src =>
@@ -42,34 +46,40 @@ namespace ThetisService.Mappings
 
             // Carteira Mappings
             CreateMap<CarteiraRecomendada, CarteiraRecomendadaViewModel>()
-                .ForMember(dest => dest.NomeCliente, opt => opt.MapFrom(src =>
-                    src.Cliente != null ? src.Cliente.Nome : string.Empty))
+                .ForMember(dest => dest.NomeCliente, opt => opt.MapFrom(src => src.Cliente != null ? src.Cliente.Nome : string.Empty))
                 .ForMember(dest => dest.NivelRisco, opt => opt.MapFrom(src => src.NivelRisco.ToString()))
                 .ForMember(dest => dest.Objetivo, opt => opt.MapFrom(src => src.Objetivo.ToString()))
+                .ForMember(d => d.RendimentoEsperado, o => o.MapFrom(s => s.RentabilidadeEsperada))
                 .ForMember(dest => dest.Itens, opt => opt.MapFrom(src => src.Itens));
 
             CreateMap<CarteiraRecomendadaViewModel, CarteiraRecomendada>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
                 .ForMember(dest => dest.Cliente, opt => opt.Ignore())
                 .ForMember(dest => dest.Itens, opt => opt.Ignore())
-                .ForMember(dest => dest.NivelRisco, opt => opt.MapFrom(src =>
-                    Enum.Parse<PerfilRisco>(src.NivelRisco)))
-                .ForMember(dest => dest.Objetivo, opt => opt.MapFrom(src =>
-                    Enum.Parse<ObjetivoInvestimento>(src.Objetivo)));
+                .ForMember(d => d.RentabilidadeEsperada, o => o.MapFrom(s => s.RendimentoEsperado))
+                .ForMember(dest => dest.NivelRisco, opt => opt.MapFrom(src => Enum.Parse<PerfilRisco>(src.NivelRisco)))
+                .ForMember(dest => dest.Objetivo, opt => opt.MapFrom(src => Enum.Parse<ObjetivoInvestimento>(src.Objetivo)));
 
             // ItemCarteira Mappings
             CreateMap<ItemCarteira, ItemCarteiraViewModel>()
                 .ForMember(dest => dest.AtivoId, opt => opt.MapFrom(src => src.AtivoId))
-                .ForMember(dest => dest.NomeAtivo, opt => opt.MapFrom(src =>
-                    src.Ativo != null ? src.Ativo.Nome : string.Empty))
-                .ForMember(dest => dest.TipoAtivo, opt => opt.MapFrom(src =>
-                    src.Ativo != null ? src.Ativo.TipoAtivo.ToString() : string.Empty));
+                .ForMember(dest => dest.NomeAtivo, opt => opt.MapFrom(src => src.Ativo != null ? src.Ativo.Nome : string.Empty))
+                .ForMember(dest => dest.TipoAtivo, opt => opt.MapFrom(src => src.Ativo != null ? src.Ativo.TipoAtivo.ToString() : string.Empty))
+                .ForMember(d => d.Percentual, o => o.MapFrom(s => s.PercentualCarteira))
+                .ForMember(d => d.Valor, o => o.MapFrom(s => s.ValorInvestimento))
+                .ForMember(d => d.RentabilidadeEsperada, o => o.MapFrom(s => s.RentabilidadeEsperada))
+                .ForMember(d => d.DataIncluido, o => o.MapFrom(s => s.DataIncluido));
 
             CreateMap<ItemCarteiraViewModel, ItemCarteira>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
                 .ForMember(dest => dest.CarteiraRecomendada, opt => opt.Ignore())
                 .ForMember(dest => dest.Ativo, opt => opt.Ignore())
-                .ForMember(dest => dest.CarteiraRecomendadaId, opt => opt.Ignore());
+                .ForMember(dest => dest.CarteiraRecomendadaId, opt => opt.Ignore())
+                .ForMember(d => d.CarteiraRecomendadaId, o => o.Ignore())
+                .ForMember(d => d.PercentualCarteira, o => o.MapFrom(s => s.Percentual))
+                .ForMember(d => d.ValorInvestimento, o => o.MapFrom(s => s.Valor))
+                .ForMember(d => d.RentabilidadeEsperada, o => o.MapFrom(s => s.RentabilidadeEsperada))
+                .ForMember(d => d.DataIncluido, o => o.MapFrom(s => s.DataIncluido));
 
             // VariavelMacroeconomica Mappings
             CreateMap<VariavelMacroeconomica, VariavelMacroeconomicaViewModel>();
@@ -83,7 +93,10 @@ namespace ThetisService.Mappings
                 .ForMember(dest => dest.FonteDados, opt => opt.Ignore())
                 .ForMember(dest => dest.ImpactoInvestimentos, opt => opt.Ignore())
                 .ForMember(dest => dest.Ativa, opt => opt.Ignore())
-                .ForMember(dest => dest.AtivosAfetados, opt => opt.Ignore());
+                .ForMember(dest => dest.AtivosAfetados, opt => opt.Ignore())
+                .ForMember(d => d.ValorAtual, o => o.MapFrom(s => s.ValorAtual))
+                .ForMember(d => d.DataReferencia, o => o.MapFrom(s => s.DataReferencia))
+                .ForMember(d => d.Tendencia, o => o.MapFrom(s => (s.Tendencia ?? string.Empty).Trim().ToUpperInvariant()));
         }
     }
 }

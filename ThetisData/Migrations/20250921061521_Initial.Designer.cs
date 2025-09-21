@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Oracle.EntityFrameworkCore.Metadata;
 using ThetisData.Context;
@@ -11,9 +12,11 @@ using ThetisData.Context;
 namespace ThetisData.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250921061521_Initial")]
+    partial class Initial
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -495,9 +498,16 @@ namespace ThetisData.Migrations
                         .HasColumnName("DATA_PROCESSAMENTO");
 
                     b.Property<string>("ErroMensagem")
+                        .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("NVARCHAR2(1000)")
                         .HasColumnName("ERRO_MENSAGEM");
+
+                    b.Property<string>("IpOrigem")
+                        .IsRequired()
+                        .HasMaxLength(45)
+                        .HasColumnType("NVARCHAR2(45)")
+                        .HasColumnName("IP_ORIGEM");
 
                     b.Property<string>("ParametrosEntrada")
                         .IsRequired()
@@ -518,6 +528,12 @@ namespace ThetisData.Migrations
                     b.Property<int>("TempoProcessamentoMs")
                         .HasColumnType("NUMBER(10)")
                         .HasColumnName("TEMPO_PROCESSAMENTO");
+
+                    b.Property<string>("UserAgent")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("NVARCHAR2(500)")
+                        .HasColumnName("USER_AGENT");
 
                     b.Property<string>("VersaoAlgoritmo")
                         .IsRequired()

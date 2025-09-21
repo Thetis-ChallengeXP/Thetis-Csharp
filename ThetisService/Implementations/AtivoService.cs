@@ -26,7 +26,7 @@ namespace ThetisService.Implementations
         public async Task<IEnumerable<AtivoViewModel>> GetAllAsync()
         {
             var ativos = await _context.Ativos
-                .Where(a => a.isAtivo)
+                .Where(a => a.AtivoSistema)
                 .OrderBy(a => a.TipoAtivo)
                 .ThenBy(a => a.Nome)
                 .ToListAsync();
@@ -37,7 +37,7 @@ namespace ThetisService.Implementations
         public async Task<IEnumerable<AtivoViewModel>> GetByTipoAsync(TipoAtivo tipo)
         {
             var ativos = await _context.Ativos
-                .Where(a => a.TipoAtivo == tipo && a.isAtivo)
+                .Where(a => a.TipoAtivo == tipo && a.AtivoSistema)
                 .OrderBy(a => a.Nome)
                 .ToListAsync();
 
@@ -47,7 +47,7 @@ namespace ThetisService.Implementations
         public async Task<IEnumerable<AtivoViewModel>> GetByPerfilRiscoAsync(PerfilRisco perfil)
         {
             var ativos = await _context.Ativos
-                .Where(a => a.NivelRisco == perfil && a.isAtivo)
+                .Where(a => a.NivelRisco == perfil && a.AtivoSistema)
                 .OrderBy(a => a.TipoAtivo)
                 .ThenBy(a => a.Nome)
                 .ToListAsync();
@@ -59,7 +59,7 @@ namespace ThetisService.Implementations
         {
             var ativo = await _context.Ativos
                 .Include(a => a.VariaveisMacroeconomicas)
-                .FirstOrDefaultAsync(a => a.Id == id && a.isAtivo);
+                .FirstOrDefaultAsync(a => a.Id == id && a.AtivoSistema);
 
             if (ativo == null)
                 throw new KeyNotFoundException($"Ativo com ID {id} não encontrado");
@@ -69,9 +69,22 @@ namespace ThetisService.Implementations
 
         public async Task<AtivoViewModel> GetByCodigoAsync(string codigo)
         {
+            var code = codigo.Trim().ToUpperInvariant();
+
             var ativo = await _context.Ativos
+                .AsNoTracking()
                 .Include(a => a.VariaveisMacroeconomicas)
-                .FirstOrDefaultAsync(a => a.Codigo == codigo && a.isAtivo);
+                .FirstOrDefaultAsync(a => a.AtivoSistema && a.Codigo.ToUpper() == code);
+
+            if (ativo == null && code.Length >= 2) 
+            {
+                ativo = await _context.Ativos
+                    .AsNoTracking()
+                    .Include(a => a.VariaveisMacroeconomicas)
+                    .Where(a => a.AtivoSistema && a.Codigo.ToUpper().Contains(code))
+                    .OrderBy(a => a.Codigo)
+                    .FirstOrDefaultAsync();
+            }
 
             if (ativo == null)
                 throw new KeyNotFoundException($"Ativo com código {codigo} não encontrado");
@@ -82,14 +95,17 @@ namespace ThetisService.Implementations
         public async Task<AtivoViewModel> CreateAsync(AtivoDto ativoDto)
         {
             // Validar código único
-            var existeCodigo = await _context.Ativos
-                .AnyAsync(a => a.Codigo == ativoDto.Codigo && a.isAtivo);
-            if (existeCodigo)
+            var idExistente = await _context.Ativos
+               .Where(a => a.Codigo == ativoDto.Codigo && a.AtivoSistema)
+               .Select(a => (int?)a.Id)
+               .FirstOrDefaultAsync();
+
+            if (idExistente.HasValue)
                 throw new InvalidOperationException($"Código {ativoDto.Codigo} já existe");
 
             var ativo = _mapper.Map<Ativo>(ativoDto);
             ativo.DataCriacao = DateTime.Now;
-            ativo.isAtivo = true;
+            ativo.AtivoSistema = true;
 
             var ativoCriado = await _ativoRepository.AddAsync(ativo);
             return _mapper.Map<AtivoViewModel>(ativoCriado);
@@ -98,13 +114,16 @@ namespace ThetisService.Implementations
         public async Task<AtivoViewModel> UpdateAsync(int id, AtivoDto ativoDto)
         {
             var ativo = await _ativoRepository.GetByIdAsync(id);
-            if (ativo == null || !ativo.isAtivo)
+            if (ativo == null || !ativo.AtivoSistema)
                 throw new KeyNotFoundException($"Ativo com ID {id} não encontrado");
 
             // Verificar código duplicado (exceto o próprio ativo)
             var existeCodigo = await _context.Ativos
-                .AnyAsync(a => a.Codigo == ativoDto.Codigo && a.Id != id && a.isAtivo);
-            if (existeCodigo)
+               .Where(a => a.Codigo == ativoDto.Codigo && a.AtivoSistema == true)
+               .Select(a => (int?)a.Id)
+               .FirstOrDefaultAsync();
+
+            if (existeCodigo.HasValue)
                 throw new InvalidOperationException($"Código {ativoDto.Codigo} já existe");
 
             _mapper.Map(ativoDto, ativo);
@@ -119,13 +138,13 @@ namespace ThetisService.Implementations
                 throw new KeyNotFoundException($"Ativo com ID {id} não encontrado");
 
             // Soft delete
-            ativo.isAtivo = false;
+            ativo.AtivoSistema = false;
             await _ativoRepository.UpdateAsync(ativo);
         }
 
         public async Task<IEnumerable<AtivoViewModel>> GetRecomendadosParaPerfilAsync(PerfilRisco perfil, decimal valorDisponivel)
         {
-            var query = _context.Ativos.Where(a => a.isAtivo);
+            var query = _context.Ativos.Where(a => a.AtivoSistema);
 
             // Filtrar por nível de risco compatível
             switch (perfil)
