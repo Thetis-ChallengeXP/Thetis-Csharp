@@ -5,6 +5,16 @@ API **ASP.NET Core** para recomendação de investimentos, com **Entity Framewor
 
 ---
 
+## Integrantes
+
+- Júlia Marques Mendes das Neves	(RM98680)
+- Kaiky Alvaro Miranda	(RM98118)
+- Lucas Rodrigues da Silva	(RM98344)
+- Juan Pinheiro de França	(RM552202)
+- Matheus Gusmão Aragão	(RM550826)
+
+---
+
 ## Funcionalidades
 
 * **CRUD completo**
