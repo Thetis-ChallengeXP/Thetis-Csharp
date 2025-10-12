@@ -9,6 +9,6 @@ namespace ThetisService.Interfaces
         Task<VariavelMacroeconomicaViewModel> GetByCodigoAsync(string codigo);
         Task<VariavelMacroeconomicaViewModel> UpdateAsync(int id, VariavelMacroeconomicaDto dto);
         Task<RelatorioMacroeconomicoViewModel> GetRelatorioMacroeconomicoAsync();
-        Task AtualizarVariaveisAutomaticamenteAsync();
+        Task<DadosMacroeconomicosDto> AtualizarVariaveisAutomaticamenteAsync();
     }
 }

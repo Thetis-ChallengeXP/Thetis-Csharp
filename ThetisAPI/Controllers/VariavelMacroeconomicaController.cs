@@ -14,9 +14,11 @@ namespace ThetisApi.Controllers
     public class VariaveisController : ControllerBase
     {
         private readonly IVariavelMacroeconomicaService _variaveisService;
-        public VariaveisController(IVariavelMacroeconomicaService variaveisService) 
+        private readonly IBancoCentralService _bancoCentralService;
+        public VariaveisController(IVariavelMacroeconomicaService variaveisService, IBancoCentralService bancoCentralService) 
         {
             _variaveisService = variaveisService;
+            _bancoCentralService = bancoCentralService;
         } 
 
         [HttpGet]
@@ -48,10 +50,103 @@ namespace ThetisApi.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AtualizarAutomaticamente()
+        public async Task<ActionResult<DadosMacroeconomicosDto>> AtualizarAutomaticamente()
         {
-            await _variaveisService.AtualizarVariaveisAutomaticamenteAsync();
-            return NoContent();
+            var resultado = await _variaveisService.AtualizarVariaveisAutomaticamenteAsync();
+
+            if (!resultado.Sucesso)
+                return StatusCode(500, resultado);
+
+            return Ok(resultado);
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<DadosMacroeconomicosDto>> GetDadosTempoReal()
+        {
+            var dados = await _bancoCentralService.GetDadosMacroeconomicosAsync();
+            return Ok(dados);
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<decimal?>> GetSelicTempoReal()
+        {
+            var selic = await _bancoCentralService.GetSelicAsync();
+
+            if (!selic.HasValue)
+                return NotFound("Não foi possível obter a SELIC no momento");
+
+            return Ok(new
+            {
+                valor = selic.Value,
+                unidade = "% a.a.",
+                fonte = "Banco Central do Brasil",
+                dataConsulta = DateTime.Now
+            });
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<decimal?>> GetIpcaTempoReal()
+        {
+            var ipca = await _bancoCentralService.GetIpcaAsync();
+
+            if (!ipca.HasValue)
+                return NotFound("Não foi possível obter o IPCA no momento");
+
+            return Ok(new
+            {
+                valor = ipca.Value,
+                unidade = "% mensal",
+                fonte = "IBGE via Banco Central",
+                dataConsulta = DateTime.Now
+            });
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<decimal?>> GetCdiTempoReal()
+        {
+            var cdi = await _bancoCentralService.GetCdiAsync();
+
+            if (!cdi.HasValue)
+                return NotFound("Não foi possível obter o CDI no momento");
+
+            return Ok(new
+            {
+                valor = cdi.Value,
+                unidade = "% a.a.",
+                fonte = "IBGE via Banco Central",
+                dataConsulta = DateTime.Now
+            });
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<decimal?>> GetDolarTempoReal()
+        {
+            var dolar = await _bancoCentralService.GetDolarAsync();
+
+            if (!dolar.HasValue)
+                return NotFound("Não foi possível obter o Dólar no momento");
+
+            return Ok(new
+            {
+                valor = dolar.Value,
+                fonte = "IBGE via Banco Central",
+                dataConsulta = DateTime.Now
+            });
+        }
+
+        [HttpGet]
+        public async Task<ActionResult> TestarConexaoApiBCB()
+        {
+            var sucesso = await _bancoCentralService.TestarConexaoAsync();
+
+            return Ok(new
+            {
+                conectado = sucesso,
+                mensagem = sucesso
+                    ? "API externa está funcionando corretamente"
+                    : "Falha ao conectar com API externa",
+                dataTesteConexao = DateTime.Now
+            });
         }
 
         [HttpGet]

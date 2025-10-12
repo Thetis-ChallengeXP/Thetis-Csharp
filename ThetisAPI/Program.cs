@@ -23,10 +23,36 @@ namespace InvestmentAdvisorAPI
             builder.Services.AddAutoMapper(cfg => { }, typeof(ThetisMappingProfile).Assembly);
 
             builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+
+            builder.Services.AddHttpClient<IBancoCentralService, BancoCentralService>(client =>
+            {
+                //client.Timeout = TimeSpan.FromSeconds(30);
+                client.DefaultRequestHeaders.Add("User-Agent", "ThetisAPI/1.0");
+            })
+            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            {
+                 // Configurações opcionais para melhor performance
+                 MaxConnectionsPerServer = 10,
+                 UseProxy = false
+            });
+
+            builder.Services.AddHttpClient<IGeminiService, GeminiService>(client =>
+            {
+                client.Timeout = TimeSpan.FromSeconds(60); // IA pode demorar mais
+                client.DefaultRequestHeaders.Add("User-Agent", "ThetisAPI/1.0");
+            })
+            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            {
+                MaxConnectionsPerServer = 10,
+                UseProxy = false
+            });
+
             builder.Services.AddScoped<IClienteService, ClienteService>();
             builder.Services.AddScoped<IAtivoService, AtivoService>();
             builder.Services.AddScoped<IRecomendacaoService, RecomendacaoService>();
             builder.Services.AddScoped<IVariavelMacroeconomicaService, VariavelMacroeconomicaService>();
+            builder.Services.AddScoped<IBancoCentralService, BancoCentralService>();
+            builder.Services.AddScoped<IGeminiService, GeminiService>();
             builder.Services.AddSingleton<IFileStorage, FileStorage>();
 
             builder.Services.AddEndpointsApiExplorer();
