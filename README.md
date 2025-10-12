@@ -5,6 +5,16 @@ API **ASP.NET Core** para recomendação de investimentos, com **Entity Framewor
 
 ---
 
+## Integrantes
+
+- Júlia Marques Mendes das Neves	(RM98680)
+- Kaiky Alvaro Miranda	(RM98118)
+- Lucas Rodrigues da Silva	(RM98344)
+- Juan Pinheiro de França	(RM552202)
+- Matheus Gusmão Aragão	(RM550826)
+
+---
+
 ## Funcionalidades
 
 * **CRUD completo**
@@ -35,16 +45,25 @@ API **ASP.NET Core** para recomendação de investimentos, com **Entity Framewor
 
 ```
 Thetis/
-├── ThetisApi/                  # API Web ASP.NET Core (Projeto Principal)
-├── ThetisData/                 # Class Library (DbContext e Configurações)
-├── ThetisModel/                # Class Library (Entidades/Models)
-├── ThetisService/              # Class Library (Regras de negócio)
-└── Thetis.sln  # Arquivo da Solução
+├── ThetisApi/      # API Web ASP.NET Core (Controllers, Swagger, DI/Startup)
+├── ThetisService/  # Regras de negócio (Services, AutoMapper)
+├── ThetisData/     # Acesso a dados (DbContext, Repository, Migrations)
+├── ThetisModel/    # Contratos: Entidades, DTOs, ViewModels, Enums
+└── Thetis.sln
 ```
 
-* **Camadas:** Controllers → Services → Repository/DbContext
-* **Banco:** Oracle 19c
-* **Booleans:** persistidos como `CHAR(1)` com conversores **Y/N** globais (EF Core)
+### Camadas & responsabilidades
+
+* **ThetisApi**: expõe endpoints REST, valida entrada e retorna respostas padronizadas. Somente orquestra — não contém regra de negócio.
+* **ThetisService**: implementa **use cases** (ex.: gerar recomendação, simular rendimento, CRUD lógico). Usa AutoMapper para mapear DTO/VM ⇄ Entity.
+* **ThetisData**: **EF Core** + **Oracle 19c**. `AppDbContext`, Repository genérico, Migrations, conversores (bool ⇄ CHAR(1) Y/N).
+* **ThetisModel**: tipos compartilhados (Entities/DTOs/ViewModels/Enums). Sem dependência de infraestrutura.
+
+### Diagrama de Componentes
+![Diagrama de componentes](./images/diagrama_componentes(1).png)
+
+### Diagrama de domínio
+![Diagrama de domínio](./images/Diagrama.png)
 
 ---
 
@@ -77,9 +96,6 @@ Thetis/
 
 ## Banco & Migrations
 > Oracle 19c não possui `BOOLEAN`. O projeto aplica conversores globais para **CHAR(1)** com valores **'Y'/'N'**.
-
-Diagrama de domínio
-![Diagrama de domínio](./images/Diagrama.png)
 
 Comandos comuns:
 
