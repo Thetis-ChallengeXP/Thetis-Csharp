@@ -12,7 +12,7 @@ API **ASP.NET Core** para recomendação de investimentos com **IA Generativa (G
 - [Funcionalidades](#funcionalidades)
 - [Arquitetura](#arquitetura)
 - [Tecnologias e Integrações](#tecnologias-e-integrações)
-- [Publicação em Ambiente Cloud](#-publicação-em-ambiente-cloud)
+- [Publicação em Ambiente Cloud](#publicação-em-ambiente-cloud)
 - [Configuração](#configuração)
 - [Banco & Migrations](#banco--migrations)
 - [Executando](#executando)
