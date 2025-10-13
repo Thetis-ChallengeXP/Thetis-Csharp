@@ -331,7 +331,7 @@ dotnet run
 
 ---
 
-## Exemplos de Requisições
+## Exemplos de uso
 
 ### Criar Cliente
 
