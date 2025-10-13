@@ -1,17 +1,67 @@
 # Thetis – Assessor Virtual de Investimentos
-API **ASP.NET Core** para recomendação de investimentos, com **Entity Framework Core** + **Oracle 19c**, **AutoMapper**, **Swagger** e **manipulação de arquivos (JSON/TXT)** para backup e importação.
+API **ASP.NET Core** para recomendação de investimentos com **IA Generativa (Google Gemini)**, **Entity Framework Core** + **Oracle 19c**, **AutoMapper**, **Swagger**, **manipulação de arquivos (JSON/TXT)** e **APIs externas** (Banco Central do Brasil).
 
-> **Stack:** .NET 8, EF Core 9, Oracle.EntityFrameworkCore, AutoMapper, Swashbuckle (Swagger).
+> **Stack:** .NET 8, EF Core 9, Oracle.EntityFrameworkCore, AutoMapper, Swashbuckle (Swagger), Google Gemini AI, APIs REST externas.
+
+---
+
+## 📋 Índice
+
+- [Integrantes](#integrantes)
+- [Novidades da Sprint 4](#novidades-da-sprint-4)
+- [Funcionalidades](#funcionalidades)
+- [Arquitetura](#arquitetura)
+- [Tecnologias e Integrações](#tecnologias-e-integrações)
+- [Configuração](#configuração)
+- [Banco & Migrations](#banco--migrations)
+- [Executando](#executando)
+- [Endpoints Principais](#endpoints-principais)
+- [Exemplos de Uso](#exemplos-de-uso)
+- [Documentação da IA](#documentação-da-ia)
+- [Testes e Validação](#testes-e-validação)
 
 ---
 
 ## Integrantes
 
-- Júlia Marques Mendes das Neves	(RM98680)
-- Kaiky Alvaro Miranda	(RM98118)
-- Lucas Rodrigues da Silva	(RM98344)
-- Juan Pinheiro de França	(RM552202)
-- Matheus Gusmão Aragão	(RM550826)
+| Nome | RM |
+|------|-----|
+| Júlia Marques Mendes das Neves | RM98680 |
+| Kaiky Alvaro Miranda | RM98118 |
+| Lucas Rodrigues da Silva | RM98344 |
+| Juan Pinheiro de França | RM552202 |
+| Matheus Gusmão Aragão | RM550826 |
+
+---
+
+## 🚀 Novidades da Sprint 4
+
+### 1. **Integração com IA Generativa (Google Gemini)**
+- ✅ Análise inteligente de carteiras de investimento
+- ✅ Explicações personalizadas de conceitos financeiros
+- ✅ Recomendações adaptativas baseadas em perfil
+- ✅ Comparação entre perfil do investidor e carteira sugerida
+- ✅ Sugestões de melhorias para portfolios existentes
+
+### 2. **APIs Externas - Dados em Tempo Real**
+- ✅ Integração com API do Banco Central do Brasil
+- ✅ Consulta automática de indicadores macroeconômicos:
+  - Taxa SELIC
+  - IPCA (Inflação)
+  - CDI
+  - Cotação do Dólar (PTAX)
+- ✅ Atualização automática de variáveis econômicas
+- ✅ Sistema de fallback para garantir disponibilidade
+
+### 3. **Melhorias no Algoritmo de Recomendação**
+- ✅ Consideração de variáveis macroeconômicas na alocação
+- ✅ Ajuste dinâmico de percentuais por perfil de risco
+- ✅ Diversificação inteligente por tipo de ativo
+
+### 4. **Novas Funcionalidades**
+- ✅ Análise detalhada de diversificação de carteiras
+- ✅ Relatórios macroeconômicos consolidados
+- ✅ Endpoints de teste de conectividade com APIs externas
 
 ---
 
@@ -22,13 +72,26 @@ API **ASP.NET Core** para recomendação de investimentos, com **Entity Framewor
   * Clientes
   * Ativos
   * Carteiras recomendadas (geração e análise)
-  * Variáveis macroeconômicas (opcional, usada para relatórios e contexto)
+  * Variáveis macroeconômicas (integradas com APIs)
 * **Recomendações**
 
   * Geração de carteira por perfil de risco/objetivo/prazo
   * Aprovação de carteira
-  * Análise de diversificação
+  * Análise de diversificação (RF/RV/Fundos)
   * Simulação de rendimento
+  * Score de adequação ao perfil
+* **IA Generativa (Google Gemini)**
+  
+  * Análise detalhada de carteiras
+  * Identificação de pontos fortes e riscos
+  * Recomendações personalizadas
+  * Explicação de conceitos financeiros (3 níveis: básico/intermediário/avançado)
+  * Comparação perfil x carteira
+* **APIs Externas**
+  
+  * Consulta de dados macroeconômicos em tempo real
+  * Atualização automática de indicadores
+  * Relatórios econômicos consolidados
 * **Arquivos**
 
   * Exportação **JSON** (snapshot dos dados)
@@ -37,7 +100,7 @@ API **ASP.NET Core** para recomendação de investimentos, com **Entity Framewor
 * **Documentação**
 
   * Swagger UI na raiz `/`
-  * Código limpo e camadas separadas
+  * Código limpo e camadas separadas(API, Service, Data, Model)
 
 ---
 
@@ -45,10 +108,40 @@ API **ASP.NET Core** para recomendação de investimentos, com **Entity Framewor
 
 ```
 Thetis/
-├── ThetisApi/      # API Web ASP.NET Core (Controllers, Swagger, DI/Startup)
-├── ThetisService/  # Regras de negócio (Services, AutoMapper)
-├── ThetisData/     # Acesso a dados (DbContext, Repository, Migrations)
-├── ThetisModel/    # Contratos: Entidades, DTOs, ViewModels, Enums
+├── ThetisApi/           # API Web ASP.NET Core (Controllers, Swagger, DI/Startup)
+│   ├── Controllers/
+│   │   ├── ClientesController.cs
+│   │   ├── AtivosController.cs
+│   │   ├── RecomendacoesController.cs
+│   │   ├── VariaveisController.cs
+│   │   ├── IAController.cs        # (NOVO) Endpoints de IA
+│   │   └── BackupController.cs
+│   └── App_Data/        # Arquivos exportados (JSON/TXT)
+│
+├── ThetisService/       # Regras de negócio (Services, AutoMapper)
+│   ├── Implementations/
+│   │   ├── ClienteService.cs
+│   │   ├── AtivoService.cs
+│   │   ├── RecomendacaoService.cs
+│   │   ├── VariavelMacroeconomicaService.cs
+│   │   ├── GeminiService.cs              # (NOVO) Serviço de IA
+│   │   └── BancoCentralService.cs        # (NOVO) API Externa
+│   └── Interfaces/
+│
+├── ThetisData/          #  Acesso a dados (EF Core, Repository, Migrations)
+│   ├── Context/
+│   ├── Repositories/
+│   └── Migrations/
+│
+├── ThetisModel/         # Contratos: Entidades, DTOs, ViewModels, Enums
+│   ├── Entities/
+│   ├── DTOs/
+│   │   ├── ClienteDto.cs
+│   │   ├── GeminiDto.cs              # (NOVO) Contratos IA
+│   │   └── BancoCentralDto.cs        # (NOVO) Contratos API Externa
+│   ├── ViewModels/
+│   └── Enums/
+│
 └── Thetis.sln
 ```
 
@@ -67,9 +160,35 @@ Thetis/
 
 ---
 
+## Tecnologias e Integrações
+
+### Backend
+- **.NET 8** - Framework principal
+- **ASP.NET Core Web API** - Camada de apresentação
+- **Entity Framework Core 9** - ORM
+- **Oracle 19c** - Banco de dados
+- **AutoMapper** - Mapeamento objeto-objeto
+
+### IA e APIs Externas
+- **Google Gemini 2.5 Flash** - IA Generativa
+  - Modelo: `gemini-2.5-flash`
+  - Temperatura: 0.2 (respostas mais determinísticas)
+  - Max tokens: 5000
+- **Banco Central do Brasil API** - Dados macroeconômicos
+  - SELIC (série 432)
+  - IPCA (série 433)
+  - CDI (série 4392)
+  - Dólar PTAX (série 1)
+
+### Documentação e Testes
+- **Swagger/OpenAPI** - Documentação interativa
+- **Swashbuckle** - Geração automática de docs
+
+---
+
 ## Configuração
 
-### 1) Connection String
+### 1) Connection String & API Keys
 
 `appsettings.json` (ou Secrets):
 
@@ -77,9 +196,14 @@ Thetis/
 {
   "ConnectionStrings": {
     "Oracle": "User Id=xxxxx;Password=xxxxx;Data Source=host:1521/ORCL;"
-  }
+  },
+ "GeminiApiKey": "SUA_CHAVE_AQUI"
 }
 ```
+
+⚠️ **Importante:** 
+- Obtenha sua API Key do Google Gemini em: https://makersuite.google.com/app/apikey
+- O plano gratuito oferece 60 requisições/minuto
 
 ### 2) Dependências
 
@@ -107,6 +231,18 @@ dotnet ef migrations add Initial
 dotnet ef database update
 ```
 
+### Estrutura do Banco
+
+**Tabelas principais:**
+- `THETIS_CLIENTES` - Dados dos investidores
+- `THETIS_ATIVOS` - Produtos de investimento
+- `THETIS_CARTEIRAS_RECOMENDADAS` - Portfolios sugeridos
+- `THETIS_ITENS_CARTEIRA` - Composição das carteiras
+- `THETIS_VARIAVEIS_MACROECONOMICAS` - Indicadores econômicos
+- `THETIS_LOGS_RECOMENDACAO` - Auditoria de recomendações
+- `THETIS_HISTORICO_INVESTIMENTOS` - Transações realizadas
+- `THETIS_AVALIACOES_CARTEIRA` - Feedback dos clientes
+
 ---
 
 ## Executando
@@ -125,45 +261,74 @@ dotnet run
 
 ### Clientes (`/Clientes`)
 
-* `GET /Clientes/GetAll`
-* `GET /Clientes/GetById/{id}`
-* `GET /Clientes/GetPerfil/{id}`
-* `POST /Clientes/Create`
-* `PUT /Clientes/Update/{id}`
-* `DELETE /Clientes/Delete/{id}`
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| GET | `/Clientes/GetAll` | Lista todos os clientes ativos |
+| GET | `/Clientes/GetById/{id}` | Busca cliente por ID |
+| GET | `/Clientes/GetPerfil/{id}` | Retorna perfil investidor |
+| POST | `/Clientes/Create` | Cria novo cliente |
+| PUT | `/Clientes/Update/{id}` | Atualiza cliente |
+| DELETE | `/Clientes/Delete/{id}` | Soft delete de cliente |
 
 ### Ativos (`/Ativos`)
 
-* `GET /Ativos/GetAll`
-* `GET /Ativos/GetById/{id}`
-* `GET /Ativos/GetByCodigo/{codigo}`
-* `GET /Ativos/GetByTipo?tipo=1`
-* `GET /Ativos/GetByPerfilRisco?perfil=2`
-* `POST /Ativos/Create`
-* `PUT /Ativos/Update/{id}`
-* `DELETE /Ativos/Delete/{id}`
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| GET | `/Ativos/GetAll` | Lista todos os ativos |
+| GET | `/Ativos/GetById/{id}` | Busca ativo por ID |
+| GET | `/Ativos/GetByCodigo/{codigo}` | Busca por código (ex: VALE3) |
+| GET | `/Ativos/GetByTipo?tipo=1` | Filtra por tipo (1=RF, 2=RV, 3=Fundos) |
+| GET | `/Ativos/GetByPerfilRisco?perfil=2` | Filtra por perfil de risco |
+| POST | `/Ativos/Create` | Cadastra novo ativo |
+| PUT | `/Ativos/Update/{id}` | Atualiza ativo |
+| DELETE | `/Ativos/Delete/{id}` | Remove ativo |
 
 ### Recomendações (`/Recomendacoes`)
 
-* `POST /Recomendacoes/GerarRecomendacao`
-* `GET /Recomendacoes/GetByCliente/{clienteId}`
-* `GET /Recomendacoes/GetById/{id}`
-* `PATCH /Recomendacoes/AprovarCarteira/{id}?aprovada=true`
-* `GET /Recomendacoes/AnalisarDiversificacao/{id}`
-* `GET /Recomendacoes/SimularRendimento/{id}?meses=12`
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| POST | `/Recomendacoes/GerarRecomendacao` | Gera carteira personalizada |
+| GET | `/Recomendacoes/GetByCliente/{clienteId}` | Lista carteiras do cliente |
+| GET | `/Recomendacoes/GetById/{id}` | Detalhes da carteira |
+| PATCH | `/Recomendacoes/AprovarCarteira/{id}?aprovada=true` | Aprova/rejeita carteira |
+| GET | `/Recomendacoes/AnalisarDiversificacao/{id}` | Análise de diversificação |
+| GET | `/Recomendacoes/SimularRendimento/{id}?meses=12` | Simulação de rendimento |
 
 ### Variáveis macro (`/Variaveis`)
 
-* `GET /Variaveis/GetAll`
-* `GET /Variaveis/GetByCodigo/{codigo}`
-* `PUT /Variaveis/Update/{id}`
-* `GET /Variaveis/Relatorio`
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| GET | `/Variaveis/GetAll` | Lista todas as variáveis |
+| GET | `/Variaveis/GetByCodigo/{codigo}` | Busca por código (ex: SELIC) |
+| PUT | `/Variaveis/Update/{id}` | Atualiza variável manualmente |
+| POST | `/Variaveis/AtualizarAutomaticamente` | Atualiza via API BCB |
+| GET | `/Variaveis/GetDadosTempoReal` | Dados consolidados em tempo real |
+| GET | `/Variaveis/GetSelicTempoReal` | Consulta SELIC atual |
+| GET | `/Variaveis/GetIpcaTempoReal` | Consulta IPCA atual |
+| GET | `/Variaveis/GetCdiTempoReal` | Consulta CDI atual |
+| GET | `/Variaveis/GetDolarTempoReal` | Consulta Dólar atual |
+| GET | `/Variaveis/Relatorio` | Relatório macroeconômico completo |
+| GET | `/Variaveis/TestarConexaoApiBCB` | Teste de conectividade |
+
+### IA - Gemini (`/IA`)
+
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| POST | `/IA/Perguntar` | Faz pergunta livre à IA |
+| GET | `/IA/AnalisarCarteira/{carteiraId}` | Análise detalhada com IA |
+| GET | `/IA/ExplicarConceito?conceito=X&nivel=basico` | Explica conceitos financeiros |
+| GET | `/IA/CompararPerfilCarteira/{carteiraId}` | Compara perfil x carteira |
+| GET | `/IA/SugerirMelhorias/{carteiraId}` | Sugere 5 melhorias |
+| GET | `/IA/ListarConceitos` | Lista conceitos disponíveis |
+| GET | `/IA/TestarConexao` | Testa conexão com Gemini |
 
 ### Backup / Arquivos (`/Backup`)
 
-* `GET /Backup/ExportJson` → baixa JSON e salva cópia em `App_Data`
-* `GET /Backup/RelatorioTxt` → baixa TXT e salva cópia em `App_Data`
-* `POST /Backup/import-json` (body JSON) → importa clientes/ativos/variáveis
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| GET | `/Backup/ExportJson` | Exporta todos os dados em JSON |
+| GET | `/Backup/RelatorioTxt` | Gera relatório resumido TXT |
+| POST | `/Backup/import-json` | Importa dados do JSON |
 
 ---
 
@@ -256,6 +421,51 @@ Content-Type: application/json
   ]
 }
 ```
+
+---
+
+## Documentação da IA
+
+### Como Funciona a Integração com Gemini
+
+1. **Configuração**
+   - Adicione sua API Key no `appsettings.json`
+   - O serviço usa o modelo `gemini-2.5-flash`
+   - Temperatura: 0.2 (respostas mais consistentes)
+
+2. **Análise de Carteiras**
+   - Envia contexto completo da carteira
+   - Gemini analisa diversificação, riscos e oportunidades
+   - Retorna análise estruturada em JSON
+
+3. **Explicações Personalizadas**
+   - 3 níveis de conhecimento: básico, intermediário, avançado
+   - Conceitos financeiros explicados de forma didática
+   - Exemplos práticos incluídos
+
+4. **Limites e Boas Práticas**
+   - Plano gratuito: 60 req/min
+   - Timeout: 30 segundos por requisição
+   - Fallback em caso de erro
+
+### Conceitos Disponíveis para Explicação
+
+**Básicos:**
+- Renda Fixa, Renda Variável
+- Diversificação, Liquidez
+- Rentabilidade, Taxa Selic
+- IPCA, CDI
+
+**Intermediários:**
+- Tesouro Direto, CDB, LCI/LCA
+- Ações, Fundos de Investimento
+- ETF, Perfil de Investidor
+
+**Avançados:**
+- Derivativos, Hedge
+- Alocação de Ativos
+- Rebalanceamento
+- Análise Fundamentalista/Técnica
 
 ---
 
