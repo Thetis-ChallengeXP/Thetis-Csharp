@@ -18,7 +18,6 @@ API **ASP.NET Core** para recomendação de investimentos com **IA Generativa (G
 - [Endpoints Principais](#endpoints-principais)
 - [Exemplos de Uso](#exemplos-de-uso)
 - [Documentação da IA](#documentação-da-ia)
-- [Testes e Validação](#testes-e-validação)
 
 ---
 
@@ -34,7 +33,7 @@ API **ASP.NET Core** para recomendação de investimentos com **IA Generativa (G
 
 ---
 
-## 🚀 Novidades da Sprint 4
+## Novidades da Sprint 4
 
 ### 1. **Integração com IA Generativa (Google Gemini)**
 - ✅ Análise inteligente de carteiras de investimento
