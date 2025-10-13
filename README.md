@@ -12,6 +12,7 @@ API **ASP.NET Core** para recomendação de investimentos com **IA Generativa (G
 - [Funcionalidades](#funcionalidades)
 - [Arquitetura](#arquitetura)
 - [Tecnologias e Integrações](#tecnologias-e-integrações)
+- [Publicação em Ambiente Cloud](#-publicação-em-ambiente-cloud)
 - [Configuração](#configuração)
 - [Banco & Migrations](#banco--migrations)
 - [Executando](#executando)
@@ -182,6 +183,118 @@ Thetis/
 ### Documentação e Testes
 - **Swagger/OpenAPI** - Documentação interativa
 - **Swashbuckle** - Geração automática de docs
+
+---
+
+## Publicação em Ambiente Cloud
+
+### Informações da Aplicação Publicada
+
+**URL da API em Produção:**
+```
+[ADICIONAR URL AQUI - Ex: https://thetis-api.azurewebsites.net]
+```
+
+**Swagger em Produção:**
+```
+[ADICIONAR URL SWAGGER - Ex: https://thetis-api.azurewebsites.net/swagger]
+```
+
+### Ambiente de Cloud Utilizado
+
+| Informação | Detalhes |
+|------------|----------|
+| **Provedor Cloud** | Azure |
+| **Região** | [Ex: East US, São Paulo, etc.] |
+| **Serviço de Hospedagem** | Ex: Azure App Service |
+| **Plano/Tier** | [Ex: Free Tier, Basic, Standard] |
+| **Sistema Operacional** | Ex: Linux |
+| **Runtime** | .NET 8.0 |
+
+### Banco de Dados em Produção
+
+| Informação | Detalhes |
+|------------|----------|
+| **Banco de Dados** | Oracle 19c |
+| **Serviço** | [Ex: Oracle Autonomous Database, RDS, etc.] |
+| **Região** | [Mesma região da aplicação] |
+| **Backup** | [Configuração de backup] |
+| **Connection String** | [Armazenada em variáveis de ambiente] |
+
+### Configuração de Segurança
+
+**Variáveis de Ambiente Configuradas:**
+```bash
+# Connection Strings
+ConnectionStrings__Oracle=[CONFIGURADO]
+
+# API Keys
+GeminiApiKey=[CONFIGURADO]
+
+# Outras configurações
+ASPNETCORE_ENVIRONMENT=Production
+ASPNETCORE_URLS=https://+:443;http://+:80
+```
+
+**Secrets e Credenciais:**
+- ✅ Todas as credenciais armazenadas como variáveis de ambiente
+- ✅ Sem hardcoded secrets no código
+- ✅ Certificado SSL/TLS configurado
+- ✅ HTTPS obrigatório em produção
+
+### Processo de Deploy
+
+**1. Preparação do Código:**
+```bash
+# Build da aplicação
+dotnet publish -c Release -o ./publish
+
+# Verificar se está tudo OK
+dotnet test
+```
+
+**2. Configuração no Portal Cloud:**
+- [Descrever passos de configuração]
+- [Upload de arquivos ou Git deploy]
+- [Configuração de variáveis de ambiente]
+
+**3. Deploy:**
+```bash
+# Exemplo de comando de deploy
+[ADICIONAR COMANDO ESPECÍFICO DO PROVEDOR]
+```
+
+**4. Verificação Pós-Deploy:**
+- [ ] API responde na URL pública
+- [ ] Swagger carrega corretamente
+- [ ] Conexão com banco de dados funciona
+- [ ] Endpoints de teste retornam sucesso
+- [ ] IA Gemini responde
+- [ ] API do Banco Central funciona
+
+### Performance em Produção
+
+| Métrica | Valor |
+|---------|-------|
+| **Tempo de Resposta Médio** | [Ex: 150ms] |
+| **Requisições/Segundo** | [Ex: 100 req/s] |
+| **Disponibilidade** | [Ex: 99.9%] |
+| **Uso de Memória** | [Ex: 512 MB] |
+| **Uso de CPU** | [Ex: 30%] |
+
+### Configurações Específicas do Cloud
+
+**App Service Configuration:**
+```json
+{
+  "name": "thetis-api",
+  "location": "East US",
+  "sku": "B1",
+  "linuxFxVersion": "DOTNETCORE|8.0",
+  "alwaysOn": true,
+  "httpLoggingEnabled": true
+}
+```
 
 ---
 
