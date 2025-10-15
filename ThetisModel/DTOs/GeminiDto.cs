@@ -92,7 +92,16 @@ namespace ThetisModel.DTOs
     public class ExplicacaoPersonalizadaDto
     {
         public string Contexto { get; set; } = string.Empty;
-        public string ExplicacaoSimples { get; set; } = string.Empty;
-        public string ExplicacaoTecnica { get; set; } = string.Empty;
+        public string Explicacao { get; set; } = string.Empty;
+    }
+
+    public class LlmAnaliseResponse
+    {
+        public string? analiseDetalhada { get; set; }
+        public List<string>? pontosFortes { get; set; }
+        public List<string>? pontosDeAtencao { get; set; }
+        public List<string>? recomendacoes { get; set; }
+        public string? riscoGeral { get; set; }
+        public decimal? scoreIA { get; set; }
     }
 }

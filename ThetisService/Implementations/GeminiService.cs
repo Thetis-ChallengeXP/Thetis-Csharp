@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using ThetisModel.DTOs;
 using ThetisModel.ViewModels;
 using ThetisService.Interfaces;
@@ -90,7 +91,8 @@ Por favor, forneça:
 5. Uma classificação de risco (Baixo/Médio/Alto)
 6. Um score de 0 a 10 para a qualidade da carteira
 
-Formato da resposta: JSON com as chaves: analiseDetalhada, pontosFortes (array), pontosDeAtencao (array), recomendacoes (array), riscoGeral, scoreIA (número)";
+Formato da resposta: responda SOMENTE com um JSON válido, sem markdown e sem ```.
+Use exatamente estas chaves: analiseDetalhada, pontosFortes (array), pontosDeAtencao (array), recomendacoes (array), riscoGeral (string), scoreIA (número).";
 
                 var resposta = await AskAsync(contexto);
 
@@ -121,18 +123,15 @@ Formato da resposta: JSON com as chaves: analiseDetalhada, pontosFortes (array),
             }
         }
 
-        public async Task<ExplicacaoPersonalizadaDto> ExplicarConceitoAsync(
-            string conceito,
-            string nivelConhecimento = "basico")
+        public async Task<ExplicacaoPersonalizadaDto> ExplicarConceitoAsync(string conceito, string nivelConhecimento = "basico", string nivelExplicacao = "simples")
         {
             var prompt = $@"
 Explique o conceito de '{conceito}' em investimentos de forma {nivelConhecimento}.
 
 Forneça:
-1. Uma explicação simples (para leigos)
-2. Uma explicação técnica (para quem já investe)
-3. 2-3 exemplos práticos
-4. Próximos passos para aplicar esse conhecimento
+1. Uma explicação {nivelExplicacao}
+2. 2-3 exemplos práticos
+3. Próximos passos para aplicar esse conhecimento
 
 Seja didático e objetivo.";
 
@@ -141,8 +140,7 @@ Seja didático e objetivo.";
             return new ExplicacaoPersonalizadaDto
             {
                 Contexto = conceito,
-                ExplicacaoSimples = resposta.Resposta,
-                ExplicacaoTecnica = resposta.Resposta
+                Explicacao = resposta.Resposta,
             };
         }
 
@@ -199,20 +197,95 @@ Seja didático e objetivo.";
             };
         }
 
+        private static string? ExtractFirstJsonObject(string? text)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return null;
+
+            // remove cercas ``` (com ou sem "json")
+            text = Regex.Replace(text, @"^```(?:json)?\s*|\s*```$", "", RegexOptions.Multiline).Trim();
+
+            // remove prefixo "json" avulso no começo
+            if (text.StartsWith("json", StringComparison.OrdinalIgnoreCase))
+                text = text.Substring(4).Trim();
+
+            // encontra o primeiro objeto JSON balanceando chaves
+            int start = text.IndexOf('{');
+            if (start < 0) return null;
+
+            int depth = 0;
+            bool inString = false;
+            bool escape = false;
+
+            for (int i = start; i < text.Length; i++)
+            {
+                char c = text[i];
+
+                if (inString)
+                {
+                    if (escape) { escape = false; }
+                    else if (c == '\\') { escape = true; }
+                    else if (c == '"') { inString = false; }
+                }
+                else
+                {
+                    if (c == '"') inString = true;
+                    else if (c == '{') depth++;
+                    else if (c == '}')
+                    {
+                        depth--;
+                        if (depth == 0)
+                        {
+                            return text.Substring(start, i - start + 1);
+                        }
+                    }
+                }
+            }
+
+            return null;
+        }
+
         private AnaliseCarteiraIADto TentarParsearAnalise(string respostaIA, CarteiraRecomendadaViewModel carteira)
         {
-            return new AnaliseCarteiraIADto
+            var dto = new AnaliseCarteiraIADto
             {
                 CarteiraId = carteira.Id,
                 NomeCarteira = carteira.NomeCarteira,
-                AnaliseDetalhada = respostaIA,
-                PontosFortes = ExtrairPontos(respostaIA, "pontos fortes", "fortes", "vantagens"),
-                PontosDeAtencao = ExtrairPontos(respostaIA, "atenção", "riscos", "cuidados"),
-                Recomendacoes = ExtrairPontos(respostaIA, "recomendações", "sugestões"),
-                RiscoGeral = DeterminarRisco(carteira.NivelRisco),
-                ScoreIA = CalcularScore(carteira),
                 DataAnalise = DateTime.Now
             };
+
+            try
+            {
+                var json = ExtractFirstJsonObject(respostaIA);
+                if (!string.IsNullOrWhiteSpace(json))
+                {
+                    var model = JsonSerializer.Deserialize<LlmAnaliseResponse>(json!, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                    if (model != null)
+                    {
+                        dto.AnaliseDetalhada = model.analiseDetalhada ?? "";
+                        dto.PontosFortes = model.pontosFortes ?? new List<string>();
+                        dto.PontosDeAtencao = model.pontosDeAtencao ?? new List<string>();
+                        dto.Recomendacoes = model.recomendacoes ?? new List<string>();
+                        dto.RiscoGeral = string.IsNullOrWhiteSpace(model.riscoGeral)
+                            ? DeterminarRisco(carteira.NivelRisco)
+                            : model.riscoGeral;
+                        dto.ScoreIA = model.scoreIA ?? CalcularScore(carteira);
+                        return dto;
+                    }
+                }
+            }
+            catch
+            {
+                // cai no fallback abaixo
+            }
+
+            dto.AnaliseDetalhada = respostaIA ?? "";
+            dto.PontosFortes = ExtrairPontos(respostaIA, "pontos fortes", "fortes", "vantagens");
+            dto.PontosDeAtencao = ExtrairPontos(respostaIA, "atenção", "riscos", "cuidados");
+            dto.Recomendacoes = ExtrairPontos(respostaIA, "recomendações", "sugestões");
+            dto.RiscoGeral = DeterminarRisco(carteira.NivelRisco);
+            dto.ScoreIA = CalcularScore(carteira);
+            return dto;
         }
 
         private List<string> ExtrairPontos(string texto, params string[] palavrasChave)

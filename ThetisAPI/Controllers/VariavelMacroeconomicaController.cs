@@ -129,6 +129,7 @@ namespace ThetisApi.Controllers
             return Ok(new
             {
                 valor = dolar.Value,
+                unidade = "$USD",
                 fonte = "IBGE via Banco Central",
                 dataConsulta = DateTime.Now
             });

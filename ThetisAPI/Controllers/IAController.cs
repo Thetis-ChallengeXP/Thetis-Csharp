@@ -49,18 +49,20 @@ namespace ThetisApi.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<ExplicacaoPersonalizadaDto>> ExplicarConceito(
-            [FromQuery] string conceito,
-            [FromQuery] string nivel = "basico")
+        public async Task<ActionResult<ExplicacaoPersonalizadaDto>> ExplicarConceito([FromQuery] string conceito, [FromQuery] string nivelConhecimento = "basico", [FromQuery] string nivelExplicacao = "simples")
         {
             if (string.IsNullOrWhiteSpace(conceito))
                 return BadRequest("Informe o conceito a ser explicado");
 
-            var niveisValidos = new[] { "basico", "intermediario", "avancado" };
-            if (!niveisValidos.Contains(nivel.ToLower()))
-                return BadRequest($"Nível deve ser: {string.Join(", ", niveisValidos)}");
+            var niveisConhecimentosValidos = new[] { "basico", "intermediario", "avancado" };
+            if (!niveisConhecimentosValidos.Contains(nivelConhecimento.ToLower()))
+                return BadRequest($"Nível de conhecimento deve ser: {string.Join(", ", niveisConhecimentosValidos)}");
+            
+            var niveisExplicacaoValidos = new[] { "simples", "técnica" };
+            if (!niveisExplicacaoValidos.Contains(nivelExplicacao.ToLower()))
+                return BadRequest($"Nível de explicação deve ser: simples ou técnica");
 
-            var explicacao = await _geminiService.ExplicarConceitoAsync(conceito, nivel);
+            var explicacao = await _geminiService.ExplicarConceitoAsync(conceito, nivelConhecimento, nivelExplicacao);
             return Ok(explicacao);
         }
 

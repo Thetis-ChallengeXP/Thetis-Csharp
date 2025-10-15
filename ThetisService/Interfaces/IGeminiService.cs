@@ -12,7 +12,7 @@ namespace ThetisService.Interfaces
     {
         Task<AnaliseIADto> AskAsync(string pergunta);
         Task<AnaliseCarteiraIADto> AnalisarCarteiraAsync(CarteiraRecomendadaViewModel carteira);
-        Task<ExplicacaoPersonalizadaDto> ExplicarConceitoAsync(string conceito, string nivelConhecimento = "basico");
+        Task<ExplicacaoPersonalizadaDto> ExplicarConceitoAsync(string conceito, string nivelConhecimento = "basico", string nivelExplicacao = "simples");
         Task<bool> TestarConexaoAsync();
     }
 }
